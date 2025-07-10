@@ -4,14 +4,20 @@ import psycopg2
 from sqlalchemy import create_engine
 from app.db.models import Base
 from app.config import settings
+from urllib.parse import urlparse, unquote
 
-# Parse DATABASE_URL (support both with and without '+psycopg2')
+# Parse DATABASE_URL using urllib.parse to handle URL encoding
 DATABASE_URL = settings.DATABASE_URL
-pattern = r"postgresql(?:\+psycopg2)?://(.*?):(.*?)@(.*?):(\d+)/(.*)"
-match = re.match(pattern, DATABASE_URL)
-if not match:
-    raise ValueError(f"DATABASE_URL is not in the expected format: {DATABASE_URL}")
-user, password, host, port, dbname = match.groups()
+parsed_url = urlparse(DATABASE_URL)
+
+# Extract components and decode URL-encoded parts
+user = unquote(parsed_url.username)
+password = unquote(parsed_url.password)
+host = parsed_url.hostname
+port = parsed_url.port
+dbname = parsed_url.path.lstrip('/')
+
+print(f"DEBUG: Parsed connection - user: {user}, host: {host}, port: {port}, dbname: {dbname}")
 
 # Connect to default 'postgres' database to create the target database
 conn = psycopg2.connect(dbname='postgres', user=user, password=password, host=host, port=port)

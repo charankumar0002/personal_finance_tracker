@@ -65,6 +65,8 @@ def test_connection():
 def create_database():
     """Create database and tables"""
     try:
+        from app.config import settings
+        print(f"DEBUG: Using DATABASE_URL: {settings.DATABASE_URL}")
         import app.db.create_db_and_tables
         print("✅ Database and tables created successfully!")
         return True
