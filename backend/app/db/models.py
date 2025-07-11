@@ -20,6 +20,7 @@ class KYC(Base):
     pan_number = Column(String, nullable=False)
     aadhaar_number = Column(String, nullable=False)
     address = Column(Text, nullable=False)
+    status = Column(String, nullable=False, default="pending")  # New field for KYC status
     user = relationship("User", back_populates="kyc")
 
 class InvestorProfile(Base):

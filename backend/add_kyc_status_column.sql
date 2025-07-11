@@ -1,0 +1,1 @@
+ALTER TABLE kyc ADD COLUMN status VARCHAR NOT NULL DEFAULT 'pending'; 

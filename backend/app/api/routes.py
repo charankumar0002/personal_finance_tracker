@@ -5,6 +5,9 @@ from ..models import SignupModel, KYCModel, InvestorProfileModel, BankLinkReques
 from ..core.security import hash_password
 from ..dependencies import get_db
 from ..db.models import User
+from fastapi.security import OAuth2PasswordRequestForm
+from ..core.jwt_utils import create_access_token
+from ..core.security import verify_password
 
 router = APIRouter()
 
@@ -68,3 +71,14 @@ def initiate_bank_link(data: BankLinkRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     # Mock bank linking flow
     return {"status": "success", "message": "Bank link initiated", "link_url": "https://mock-plaid-link.com/12345"}
+
+@router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    kyc = db.query(KYC).filter(KYC.user_id == user.id).first()
+    if not kyc or kyc.status != "verified":
+        raise HTTPException(status_code=403, detail="KYC not verified")
+    access_token = create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer"}
