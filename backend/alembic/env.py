@@ -2,6 +2,8 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 from db.models import Base
+from db.models import *  # import all models
+from config import settings
 
 from logging.config import fileConfig
 
